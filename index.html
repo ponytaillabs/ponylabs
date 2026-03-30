@@ -563,9 +563,10 @@ function makeSparkline(prices, width, height, colorClass) {
 }
 
 /* âââ FETCH âââ */
+const PROXY = 'https://corsproxy.io/?url=';
 async function fetchQuote(sym){
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=5m&range=1d`;
-  const r = await fetch(url);
+  const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=5m&range=1d`;
+  const r = await fetch(PROXY + encodeURIComponent(target));
   if(!r.ok) throw new Error(r.status);
   const d = await r.json();
   const result = d.chart.result[0];
@@ -591,7 +592,7 @@ async function fetchNews() {
 
   // Try fetching news from Yahoo Finance search API
   try {
-    const url = `https://query1.finance.yahoo.com/v1/finance/search?q=stock%20market&newsCount=8&enableNavLinks=false&enableCb=false`;
+    const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v1/finance/search?q=stock%20market&newsCount=8&enableNavLinks=false&enableCb=false`);
     const r = await fetch(url);
     if (r.ok) {
       const data = await r.json();
@@ -613,7 +614,7 @@ async function fetchNews() {
   if (newsItems.length === 0) {
     for (const sym of symbols.slice(0, 3)) {
       try {
-        const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${sym}&newsCount=3&enableNavLinks=false`;
+        const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v1/finance/search?q=${sym}&newsCount=3&enableNavLinks=false`);
         const r = await fetch(url);
         if (r.ok) {
           const data = await r.json();
