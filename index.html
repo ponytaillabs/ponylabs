@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Market Context AI</title>
-<meta name="description" content="Live market dashboard â Magnificent 7, AI & disruptive tech, indicators, and market news.">
+<meta name="description" content="Live market dashboard — AI context, indicators, Magnificent 7, ETFs, crypto, commodities, and market news.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>ð</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -174,6 +174,51 @@
     background: var(--border);
   }
 
+  /* AI CONTEXT CARD */
+  .ai-context-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 36px;
+  }
+  .ai-context-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .ai-context-title {
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .sparkle-icon {
+    font-size: 14px;
+  }
+  .ai-context-timestamp {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-left: auto;
+  }
+  .ai-context-insights {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ai-insight {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--text);
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius-sm);
+  }
+
   /* INDICATOR CARDS */
   .indicator-grid {
     display: grid;
@@ -290,6 +335,49 @@
   .down { color: var(--down); }
   .flat { color: var(--text-muted); }
 
+  /* EARNINGS TABLE */
+  .earnings-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .earnings-table thead {
+    background: var(--surface2);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .earnings-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .earnings-table td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text);
+    border-bottom: 0.5px solid var(--border);
+    font-family: 'DM Mono', monospace;
+  }
+  .earnings-table tr:last-child td {
+    border-bottom: none;
+  }
+  .earnings-company {
+    font-weight: 500;
+  }
+  .earnings-date {
+    color: var(--text-muted);
+  }
+  .earnings-eps {
+    color: var(--text-muted);
+  }
+
   /* NEWS SECTION */
   .news-list {
     display: flex;
@@ -393,6 +481,8 @@
     main { padding-top: 24px; }
     .indicator-grid { grid-template-columns: repeat(2, 1fr); }
     .ticker-grid { grid-template-columns: repeat(2, 1fr); }
+    .ai-context-header { flex-wrap: wrap; }
+    .ai-context-timestamp { width: 100%; margin-top: 8px; margin-left: 0; }
   }
 </style>
 </head>
@@ -407,10 +497,25 @@
       <span class="pulse-dot stale" id="status-dot"></span>
       <span id="status-text">Loading</span>
     </div>
-    <button class="refresh-btn" id="refresh-btn" onclick="handleRefresh()">â» refresh</button>
+    <button class="refresh-btn" id="refresh-btn" onclick="handleRefresh()">↻ refresh</button>
   </div>
 </header>
 <main>
+  <!-- AI MARKET CONTEXT -->
+  <div class="ai-context-card fade-in fade-in-1" id="ai-context">
+    <div class="ai-context-header">
+      <span class="sparkle-icon">✨</span>
+      <span class="ai-context-title">AI Market Context</span>
+      <span class="ai-context-timestamp" id="context-time"></span>
+    </div>
+    <div class="ai-context-insights" id="context-insights">
+      <div class="ai-insight"><span class="sk" style="width:90%;height:14px"></span></div>
+      <div class="ai-insight"><span class="sk" style="width:85%;height:14px"></span></div>
+      <div class="ai-insight"><span class="sk" style="width:80%;height:14px"></span></div>
+    </div>
+  </div>
+
+  <!-- MARKET INDICATORS -->
   <div class="section">
     <div class="section-header">
       <span class="section-label">Market indicators</span>
@@ -420,9 +525,11 @@
       <div class="ind-card"><div class="ind-label">VIX</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
       <div class="ind-card"><div class="ind-label">10Y yield</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
       <div class="ind-card"><div class="ind-label">DXY</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
-      <div class="ind-card"><div class="ind-label">BTC / USD</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ind-card"><div class="ind-label">S&P 500</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
     </div>
   </div>
+
+  <!-- MAGNIFICENT 7 -->
   <div class="section">
     <div class="section-header">
       <span class="section-label">Magnificent 7</span>
@@ -438,6 +545,8 @@
       <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
     </div>
   </div>
+
+  <!-- AI & DISRUPTIVE TECH -->
   <div class="section">
     <div class="section-header">
       <span class="section-label">AI &amp; disruptive tech</span>
@@ -452,6 +561,122 @@
       <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
     </div>
   </div>
+
+  <!-- ETFs & INDICES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">ETFs &amp; indices</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="ticker-grid" id="etfs">
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+    </div>
+  </div>
+
+  <!-- CRYPTO -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Crypto</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="ticker-grid" id="crypto">
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ticker-card"><div class="sk" style="width:50px;height:13px;margin-bottom:10px"></div><div class="sk" style="width:80px;height:18px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+    </div>
+  </div>
+
+  <!-- COMMODITIES -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Commodities</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="indicator-grid" id="commodities">
+      <div class="ind-card"><div class="ind-label">Gold</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ind-card"><div class="ind-label">Silver</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ind-card"><div class="ind-label">Crude Oil</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+      <div class="ind-card"><div class="ind-label">Natural Gas</div><div class="sk" style="width:80px;height:22px;margin-bottom:5px"></div><div class="sk" style="width:60px;height:11px"></div></div>
+    </div>
+  </div>
+
+  <!-- EARNINGS CALENDAR -->
+  <div class="section">
+    <div class="section-header">
+      <span class="section-label">Earnings calendar</span>
+      <div class="section-line"></div>
+    </div>
+    <table class="earnings-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Report Date</th>
+          <th>Est. EPS</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="earnings-company">Apple (AAPL)</td>
+          <td class="earnings-date">Late Apr</td>
+          <td class="earnings-eps">$1.17</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Microsoft (MSFT)</td>
+          <td class="earnings-date">Late Apr</td>
+          <td class="earnings-eps">$2.95</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Alphabet (GOOGL)</td>
+          <td class="earnings-date">Late Apr</td>
+          <td class="earnings-eps">$1.55</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Amazon (AMZN)</td>
+          <td class="earnings-date">Late Apr</td>
+          <td class="earnings-eps">$0.75</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Meta (META)</td>
+          <td class="earnings-date">Late Apr</td>
+          <td class="earnings-eps">$5.21</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Nvidia (NVDA)</td>
+          <td class="earnings-date">May 22</td>
+          <td class="earnings-eps">$0.68</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Tesla (TSLA)</td>
+          <td class="earnings-date">Apr 23</td>
+          <td class="earnings-eps">$0.41</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Intel (INTC)</td>
+          <td class="earnings-date">Apr 25</td>
+          <td class="earnings-eps">$0.16</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">AMD (AMD)</td>
+          <td class="earnings-date">Early May</td>
+          <td class="earnings-eps">$0.94</td>
+        </tr>
+        <tr>
+          <td class="earnings-company">Palantir (PLTR)</td>
+          <td class="earnings-date">Early May</td>
+          <td class="earnings-eps">$0.13</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MARKET NEWS -->
   <div class="section">
     <div class="section-header">
       <span class="section-label">Market news</span>
@@ -472,7 +697,7 @@
 </footer>
 
 <script>
-/* âââ CONFIG âââ */
+/* CONFIG */
 const MAG7 = [
   {sym:'AAPL',name:'Apple'},
   {sym:'MSFT',name:'Microsoft'},
@@ -490,14 +715,35 @@ const DISRUPTIVE = [
   {sym:'IONQ',name:'IonQ'},
   {sym:'SNOW',name:'Snowflake'}
 ];
+const ETFS = [
+  {sym:'SPY',name:'S&P 500 ETF'},
+  {sym:'QQQ',name:'Nasdaq-100'},
+  {sym:'DIA',name:'Dow Jones'},
+  {sym:'IWM',name:'Russell 2000'},
+  {sym:'ARKK',name:'ARK Innovation'}
+];
+const CRYPTO = [
+  {sym:'BTC-USD',name:'Bitcoin'},
+  {sym:'ETH-USD',name:'Ethereum'},
+  {sym:'SOL-USD',name:'Solana'},
+  {sym:'XRP-USD',name:'XRP'},
+  {sym:'ADA-USD',name:'Cardano'},
+  {sym:'DOGE-USD',name:'Dogecoin'}
+];
 const INDICATORS = [
   {sym:'^VIX',label:'VIX',fmt:v=>v.toFixed(2)},
   {sym:'^TNX',label:'10Y yield',fmt:v=>v.toFixed(3)+'%'},
   {sym:'DX-Y.NYB',label:'DXY',fmt:v=>v.toFixed(2)},
-  {sym:'BTC-USD',label:'BTC / USD',fmt:v=>'$'+Math.round(v).toLocaleString()}
+  {sym:'^GSPC',label:'S&P 500',fmt:v=>v.toLocaleString('en-US',{maximumFractionDigits:0})}
+];
+const COMMODITIES = [
+  {sym:'GC=F',label:'Gold',fmt:v=>'$'+v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})},
+  {sym:'SI=F',label:'Silver',fmt:v=>'$'+v.toFixed(2)},
+  {sym:'CL=F',label:'Crude Oil',fmt:v=>'$'+v.toFixed(2)},
+  {sym:'NG=F',label:'Natural Gas',fmt:v=>'$'+v.toFixed(2)}
 ];
 
-/* âââ HELPERS âââ */
+/* HELPERS */
 function cls(change){ return change > 0.001 ? 'up' : change < -0.001 ? 'down' : 'flat'; }
 function delta(change, pct){
   const s = change >= 0 ? '+' : '';
@@ -508,35 +754,7 @@ function deltaPct(pct){
   return `${s}${pct.toFixed(2)}%`;
 }
 
-/* âââ SPARKLINE SVG âââ */
-function sparklineSVG(prices, width, height, colorClass) {
-  if (!prices || prices.length < 2) return '';
-  const color = colorClass === 'up' ? 'var(--sparkline-up)' : colorClass === 'down' ? 'var(--sparkline-down)' : 'var(--text-faint)';
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-  const pad = 1;
-  const points = prices.map((p, i) => {
-    const x = pad + (i / (prices.length - 1)) * (width - pad * 2);
-    const y = pad + (1 - (p - min) / range) * (height - pad * 2);
-    return `${x.toFixed(1)},${y.toFixed(1)}`;
-  });
-  // Gradient fill under the line
-  const lastX = (width - pad).toFixed(1);
-  const fillPoints = [...points, `${lastX},${height}`, `${pad},${height}`].join(' ');
-  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="sg_${Math.random().toString(36).slice(2,8)}" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="${color}" stop-opacity="0.2"/>
-        <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
-      </linearGradient>
-    </defs>
-    <polygon points="${fillPoints}" fill="url(#sg_${''})"/>
-    <polyline points="${points.join(' ')}" stroke="${color}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>
-  </svg>`;
-}
-
-// Better sparkline with proper gradient IDs
+/* SPARKLINE SVG */
 function makeSparkline(prices, width, height, colorClass) {
   if (!prices || prices.length < 2) return '';
   const color = colorClass === 'up' ? 'var(--sparkline-up)' : colorClass === 'down' ? 'var(--sparkline-down)' : 'var(--text-faint)';
@@ -562,7 +780,7 @@ function makeSparkline(prices, width, height, colorClass) {
   </svg>`;
 }
 
-/* âââ FETCH âââ */
+/* FETCH */
 const PROXY = 'https://corsproxy.io/?url=';
 async function fetchQuote(sym){
   const target = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(sym)}?interval=5m&range=1d`;
@@ -575,7 +793,6 @@ async function fetchQuote(sym){
   const prev = meta.previousClose || meta.chartPreviousClose;
   const change = price - prev;
   const pct = (change / prev) * 100;
-  // Extract intraday prices for sparkline
   let prices = [];
   try {
     const closes = result.indicators.quote[0].close;
@@ -584,13 +801,10 @@ async function fetchQuote(sym){
   return { price, change, pct, prices };
 }
 
-/* âââ NEWS FETCH âââ */
+/* NEWS FETCH */
 async function fetchNews() {
-  // Use Yahoo Finance trending tickers / news via RSS proxy
   const symbols = ['AAPL','MSFT','NVDA','TSLA','META','GOOGL','AMZN','PLTR','BTC-USD','AMD'];
   const newsItems = [];
-
-  // Try fetching news from Yahoo Finance search API
   try {
     const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v1/finance/search?q=stock%20market&newsCount=8&enableNavLinks=false&enableCb=false`);
     const r = await fetch(url);
@@ -609,8 +823,6 @@ async function fetchNews() {
       }
     }
   } catch(e) {}
-
-  // Fallback: try per-ticker news
   if (newsItems.length === 0) {
     for (const sym of symbols.slice(0, 3)) {
       try {
@@ -633,7 +845,6 @@ async function fetchNews() {
       } catch(e) {}
     }
   }
-
   return newsItems.slice(0, 8);
 }
 
@@ -646,13 +857,24 @@ function timeAgo(date) {
   return `${Math.floor(diff/86400)}d`;
 }
 
-/* âââ RENDER âââ */
+/* RENDER FUNCTIONS */
 function tickerHTML(item, data, delay){
   const fadeClass = `fade-in fade-in-${delay}`;
   if(!data) return `<div class="ticker-card ${fadeClass}"><div class="tc-sym">${item.sym}</div><div class="tc-name">${item.name}</div><div class="tc-delta flat">unavailable</div></div>`;
-  const p = data.price >= 1000
-    ? '$' + data.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-    : '$' + data.price.toFixed(2);
+  let p;
+  if (item.sym.includes('-USD')) {
+    if (data.price >= 1) {
+      p = '$' + data.price.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+    } else {
+      p = '$' + data.price.toFixed(4);
+    }
+  } else if (item.sym.includes('BTC')) {
+    p = '$' + Math.round(data.price).toLocaleString();
+  } else {
+    p = data.price >= 1000
+      ? '$' + data.price.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+      : '$' + data.price.toFixed(2);
+  }
   const c = cls(data.change);
   const spark = makeSparkline(data.prices, 48, 24, c);
   return `<div class="ticker-card ${fadeClass}">
@@ -670,7 +892,7 @@ function tickerHTML(item, data, delay){
 
 function indHTML(item, data, delay){
   const fadeClass = `fade-in fade-in-${delay}`;
-  if(!data) return `<div class="ind-card ${fadeClass}"><div class="ind-label">${item.label}</div><div class="ind-val">&mdash;</div></div>`;
+  if(!data) return `<div class="ind-card ${fadeClass}"><div class="ind-label">${item.label}</div><div class="ind-val">—</div></div>`;
   const c = cls(data.change);
   const spark = makeSparkline(data.prices, 80, 32, c);
   return `<div class="ind-card ${fadeClass}">
@@ -697,22 +919,127 @@ function newsHTML(items) {
   }).join('');
 }
 
-/* âââ LOAD âââ */
+/* AI MARKET CONTEXT ENGINE */
+function generateMarketContext(data) {
+  const insights = [];
+  const spy = data.etfs[0];
+  const qqq = data.etfs[1];
+  const dia = data.etfs[2];
+  const iwm = data.etfs[3];
+  const vix = data.indicators[0];
+  const btc = data.crypto[0];
+  const mag7 = data.mag7 || [];
+
+  if (spy && qqq && dia) {
+    const avgBroad = ((spy.pct || 0) + qqq.pct + dia.pct) / 3;
+    let desc = '';
+    if (avgBroad > 0.5) {
+      desc = `broad rally with S&P 500 up ${(spy.pct || 0).toFixed(2)}%`;
+    } else if (avgBroad < -0.5) {
+      desc = `broad decline with S&P 500 down ${Math.abs(spy.pct || 0).toFixed(2)}%`;
+    } else {
+      desc = 'relatively flat trading';
+    }
+    if (iwm && qqq) {
+      const smallCapPerf = (iwm.pct || 0) - (qqq.pct || 0);
+      if (smallCapPerf > 1) {
+        desc += '. Small caps outperforming suggests risk-on sentiment.';
+      } else if (smallCapPerf < -1) {
+        desc += '. Tech outperforming small caps suggests selective strength.';
+      }
+    }
+    if (desc) insights.push('Markets are ' + desc);
+  }
+
+  if (vix && vix.price !== undefined) {
+    const vixVal = vix.price;
+    let vixDesc = '';
+    if (vixVal < 15) {
+      vixDesc = `VIX at ${vixVal.toFixed(1)} indicates calm market conditions with complacency risk.`;
+    } else if (vixVal < 20) {
+      vixDesc = `VIX at ${vixVal.toFixed(1)} is normal range, suggesting balanced sentiment.`;
+    } else if (vixVal < 25) {
+      vixDesc = `VIX at ${vixVal.toFixed(1)} shows elevated fear amid market uncertainty.`;
+    } else if (vixVal < 30) {
+      vixDesc = `VIX at ${vixVal.toFixed(1)} signals elevated fear—divergence often precedes larger moves.`;
+    } else {
+      vixDesc = `VIX at ${vixVal.toFixed(1)} indicates panic; strong capitulation signal.`;
+    }
+    if (vixDesc) insights.push(vixDesc);
+  }
+
+  if (mag7.length > 0 && iwm) {
+    const mag7Avg = mag7.reduce((sum, s) => sum + (s.pct || 0), 0) / mag7.length;
+    const iwmPct = iwm.pct || 0;
+    const rotation = mag7Avg - iwmPct;
+    if (rotation > 2) {
+      insights.push(`Large-cap tech (Mag7 avg ${mag7Avg.toFixed(2)}%) significantly outperforming small caps (${iwmPct.toFixed(2)}%)—flight to quality.`);
+    } else if (rotation < -2) {
+      insights.push(`Small caps (${iwmPct.toFixed(2)}%) outpacing Mag7 (${mag7Avg.toFixed(2)}%)—strong risk appetite.`);
+    }
+  }
+
+  if (btc && spy) {
+    const btcSpyDiff = (btc.pct || 0) - (spy.pct || 0);
+    if (Math.abs(btcSpyDiff) > 2) {
+      if (btcSpyDiff > 0) {
+        insights.push(`Bitcoin up ${(btc.pct || 0).toFixed(2)}% vs S&P 500 ${(spy.pct || 0).toFixed(2)}%—crypto showing outsize strength.`);
+      } else {
+        insights.push(`Bitcoin underperforming stocks (${(btc.pct || 0).toFixed(2)}% vs ${(spy.pct || 0).toFixed(2)}%)—risk-off rotation.`);
+      }
+    }
+  }
+
+  const allStocks = [...(data.mag7 || []), ...(data.disruptive || [])];
+  const bigMovers = allStocks.filter(s => s && Math.abs(s.pct || 0) > 3);
+  if (bigMovers.length > 0) {
+    const movers = bigMovers.slice(0, 2).map(s => {
+      const dir = (s.pct || 0) > 0 ? '▲' : '▼';
+      return `${s.sym} ${dir}${Math.abs(s.pct || 0).toFixed(2)}%`;
+    }).join(', ');
+    insights.push(`Notable movers: ${movers}.`);
+  }
+
+  return insights.slice(0, 5);
+}
+
+function renderMarketContext(contextData) {
+  const insights = generateMarketContext(contextData);
+  const insightsHtml = insights
+    .map(text => `<div class="ai-insight fade-in fade-in-${Math.min(insights.indexOf(text) + 1, 5)}">${text}</div>`)
+    .join('');
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  document.getElementById('context-insights').innerHTML = insightsHtml || '<div class="ai-insight">Loading insights...</div>';
+  document.getElementById('context-time').textContent = now;
+}
+
+/* LOAD ALL DATA */
 async function loadAll(){
   const dot = document.getElementById('status-dot');
   const txt = document.getElementById('status-text');
   dot.className = 'pulse-dot stale';
-  txt.textContent = 'Refreshing\u2026';
+  txt.textContent = 'Refreshing…';
 
-  const allSyms = [...MAG7,...DISRUPTIVE].map(s=>s.sym);
-  const [stockRes, indRes, newsItems] = await Promise.all([
-    Promise.allSettled(allSyms.map(s => fetchQuote(s))),
-    Promise.allSettled(INDICATORS.map(i => fetchQuote(i.sym))),
+  const allStockSyms = [...MAG7, ...DISRUPTIVE].map(s=>s.sym);
+  const allEtfSyms = ETFS.map(s=>s.sym);
+  const allCryptoSyms = CRYPTO.map(s=>s.sym);
+  const allIndSyms = INDICATORS.map(i=>i.sym);
+  const allComSyms = COMMODITIES.map(c=>c.sym);
+
+  const [stockRes, etfRes, cryptoRes, indRes, comRes, newsItems] = await Promise.all([
+    Promise.allSettled(allStockSyms.map(s => fetchQuote(s))),
+    Promise.allSettled(allEtfSyms.map(s => fetchQuote(s))),
+    Promise.allSettled(allCryptoSyms.map(s => fetchQuote(s))),
+    Promise.allSettled(allIndSyms.map(i => fetchQuote(i))),
+    Promise.allSettled(allComSyms.map(c => fetchQuote(c))),
     fetchNews().catch(() => [])
   ]);
 
   const stockData = stockRes.map(r => r.status === 'fulfilled' ? r.value : null);
+  const etfData = etfRes.map(r => r.status === 'fulfilled' ? r.value : null);
+  const cryptoData = cryptoRes.map(r => r.status === 'fulfilled' ? r.value : null);
   const indData = indRes.map(r => r.status === 'fulfilled' ? r.value : null);
+  const comData = comRes.map(r => r.status === 'fulfilled' ? r.value : null);
 
   document.getElementById('indicators').innerHTML =
     INDICATORS.map((item,i) => indHTML(item, indData[i], (i%4)+1)).join('');
@@ -720,7 +1047,27 @@ async function loadAll(){
     MAG7.map((item,i) => tickerHTML(item, stockData[i], (i%7)+1)).join('');
   document.getElementById('disruptive').innerHTML =
     DISRUPTIVE.map((item,i) => tickerHTML(item, stockData[MAG7.length+i], (i%6)+1)).join('');
+  document.getElementById('etfs').innerHTML =
+    ETFS.map((item,i) => tickerHTML(item, etfData[i], (i%5)+1)).join('');
+  document.getElementById('crypto').innerHTML =
+    CRYPTO.map((item,i) => tickerHTML(item, cryptoData[i], (i%6)+1)).join('');
+  document.getElementById('commodities').innerHTML =
+    COMMODITIES.map((item,i) => indHTML(item, comData[i], (i%4)+1)).join('');
   document.getElementById('news').innerHTML = newsHTML(newsItems);
+
+  const mag7Data = MAG7.map((item,i) => stockData[i] ? {sym:item.sym, pct:stockData[i].pct, ...stockData[i]} : null).filter(Boolean);
+  const disruptiveData = DISRUPTIVE.map((item,i) => stockData[MAG7.length+i] ? {sym:item.sym, pct:stockData[MAG7.length+i].pct, ...stockData[MAG7.length+i]} : null).filter(Boolean);
+
+  const contextData = {
+    indicators: indData.map((d, i) => d ? {label: INDICATORS[i].label, ...d} : null).filter(Boolean),
+    mag7: mag7Data,
+    disruptive: disruptiveData,
+    etfs: etfData.map((d, i) => d ? {sym: ETFS[i].sym, pct: d.pct, ...d} : null).filter(Boolean),
+    crypto: cryptoData.map((d, i) => d ? {sym: CRYPTO[i].sym, pct: d.pct, ...d} : null).filter(Boolean),
+    commodities: comData
+  };
+
+  renderMarketContext(contextData);
 
   const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   dot.className = 'pulse-dot live';
@@ -734,7 +1081,7 @@ function handleRefresh() {
   loadAll();
 }
 
-/* âââ INIT âââ */
+/* INIT */
 loadAll();
 setInterval(loadAll, 60000);
 </script>
